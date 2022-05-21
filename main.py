@@ -27,7 +27,8 @@ class Graph:
 
     def create(self):
         num = []
-        for vertix in self.vertices:
+        for i in range(len(self.vertices)):
+            vertix = self.vertices[i]
             random.seed(time.process_time)
             rnd_value = int(gamma.rvs(2, loc=1))
             num.append(rnd_value)
@@ -36,8 +37,12 @@ class Graph:
             vertices_available = [vertix_available for vertix_available in self.vertices if vertix_available.tag != vertix.tag]
             targets = random.sample(population=vertices_available, k=num_edges)
             for target in targets:
-                vertix.add_edge(target)
-                target.add_edge(vertix)
+                if i != 0 and target.tag in [edge.tag for edge in self.vertices[i - 1].edges]:
+                    vertix.add_edge(self.vertices[i - 1])
+                    self.vertices[i - 1].add_edge(vertix)
+                else:    
+                    vertix.add_edge(target)
+                    target.add_edge(vertix)
         return num
         
 
@@ -50,22 +55,20 @@ class Graph:
             
         return result
 
+    def get_edges(self):
+        result = defaultdict(list)
+
+        for vertix in self.vertices:
+            result[vertix.tag].append(vertix.edges)
+
+        return result
+
     def get_vertices_tag(self) -> List[str]:
         return [vertix.tag for vertix in self.vertices]
 
 
-fig, ax = plt.subplots(1, 1)
-k = 2
-mean, var, skew, kurt = gamma.stats(k, moments='mvsk')
-x = np.linspace(1, 10, 100)
-ax.plot(x, gamma.pdf(x, k), 'r-', lw=5, alpha=0.6, label='gamma pdf')
-
-graph = Graph(num_vertices=20)
+graph = Graph(num_vertices=35)
 r = graph.create()
-
-ax.hist(r, density=True, histtype='stepfilled', alpha=0.2)
-ax.legend(loc='best', frameon=False)
-plt.show()
 
 gviz = graphviz.Graph('finite_state_machine', filename='fsm.gv')
 gviz.attr(rankdir='LR', size='8,5')
@@ -80,4 +83,14 @@ for vertix in graph.vertices:
             edges_visited[vertix.tag].append(target.tag)
 
 gviz.render(directory='doctest-output', view=True)
+
+fig, ax = plt.subplots(1, 1)
+k = 2
+mean, var, skew, kurt = gamma.stats(k, moments='mvsk')
+x = np.linspace(1, 10, 100)
+ax.plot(x, gamma.pdf(x, k), 'r-', lw=5, alpha=0.6, label='gamma pdf')
+
+ax.hist(r, density=True, histtype='stepfilled', alpha=0.2)
+ax.legend(loc='best', frameon=False)
+plt.show()
 
