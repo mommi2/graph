@@ -1,73 +1,19 @@
 from collections import defaultdict
 from typing import List
 import graphviz
-import random
 import numpy as np
-import time
 from scipy.stats import gamma
 import matplotlib.pyplot as plt
+from collections import deque
+
+from graph import Graph
 
 
-class Vertix(object):
+NUM_VERTICES = 20
+GAMMA_OFFSET = 1
+GAMMA_K = 2
 
-    def __init__(self, tag, edges: list = None) -> None:
-        self.tag = tag
-        self.edges = edges or []
-
-    def add_edge(self, target) -> None:
-        if target in self.edges:
-            return
-        self.edges.append(target)
-    
-class Graph:
-
-    def __init__(self, num_vertices: int) -> None:
-        self.vertices = [Vertix(i) for i in range(num_vertices)]
-
-
-    def create(self):
-        num = []
-        for i in range(len(self.vertices)):
-            vertix = self.vertices[i]
-            random.seed(time.process_time)
-            rnd_value = int(gamma.rvs(2, loc=1))
-            num.append(rnd_value)
-            num_edges = len(self.vertices) - 1 if rnd_value > len(self.vertices) - 1 else rnd_value
-            print(f'{vertix.tag} num edges: {num_edges}')
-            vertices_available = [vertix_available for vertix_available in self.vertices if vertix_available.tag != vertix.tag]
-            targets = random.sample(population=vertices_available, k=num_edges)
-            for target in targets:
-                if i != 0 and target.tag in [edge.tag for edge in self.vertices[i - 1].edges]:
-                    vertix.add_edge(self.vertices[i - 1])
-                    self.vertices[i - 1].add_edge(vertix)
-                else:    
-                    vertix.add_edge(target)
-                    target.add_edge(vertix)
-        return num
-        
-
-    def get_vertices_from_tags(self, tags: list) -> List[Vertix]:
-        result = []
-        for vertix in self.vertices:
-            is_there = len([tag for tag in tags if tag == vertix.tag]) > 0
-            if is_there:
-                result.append(vertix)
-            
-        return result
-
-    def get_edges(self):
-        result = defaultdict(list)
-
-        for vertix in self.vertices:
-            result[vertix.tag].append(vertix.edges)
-
-        return result
-
-    def get_vertices_tag(self) -> List[str]:
-        return [vertix.tag for vertix in self.vertices]
-
-
-graph = Graph(num_vertices=35)
+graph = Graph(NUM_VERTICES, gamma_k=GAMMA_K, gamma_offset=GAMMA_OFFSET)
 r = graph.create()
 
 gviz = graphviz.Graph('finite_state_machine', filename='fsm.gv')
@@ -85,9 +31,9 @@ for vertix in graph.vertices:
 gviz.render(directory='doctest-output', view=True)
 
 fig, ax = plt.subplots(1, 1)
-k = 2
+k = GAMMA_K
 mean, var, skew, kurt = gamma.stats(k, moments='mvsk')
-x = np.linspace(1, 10, 100)
+x = np.linspace(GAMMA_OFFSET, 10, 100)
 ax.plot(x, gamma.pdf(x, k), 'r-', lw=5, alpha=0.6, label='gamma pdf')
 
 ax.hist(r, density=True, histtype='stepfilled', alpha=0.2)
