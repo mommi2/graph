@@ -4,6 +4,7 @@ from collections import defaultdict
 from scipy.stats import gamma
 import random
 import time
+import numpy as np
 
 from vertix import Vertix
 
@@ -97,3 +98,27 @@ class Graph:
 
     def get_vertices_tag(self) -> List[str]:
         return [vertix.tag for vertix in self.vertices]
+
+
+
+class GraphDict:
+
+    def __init__(self, num_vertices: int, max_edges: int) -> None:
+        self.graph = np.zeros((num_vertices, num_vertices), dtype=int)
+        self.max_edges = max_edges
+
+    def create(self) -> None:
+        n, _ = self.graph.shape
+        counter_edges = defaultdict(lambda: 0)
+        for j in range(n):
+            for i in range(n):
+                if self.graph[j][i] == 1 or j == i: continue
+                random.seed(time.clock())
+                rnd_result = random.randint(0, 1)
+                if  rnd_result == 1 and counter_edges[j] < self.max_edges and counter_edges[i] < self.max_edges:
+                    self.graph[j][i] = self.graph[i][j] = rnd_result
+                    counter_edges[j] = counter_edges[j] + 1
+                    if i != j:
+                        counter_edges[i] = counter_edges[i] + 1
+
+        return self.graph
