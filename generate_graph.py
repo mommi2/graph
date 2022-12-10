@@ -10,10 +10,10 @@ import time
 from graph import Graph
 
 
-NUM_VERTICES = 500
-GAMMA_OFFSET = 0
-GAMMA_SHAPE = 2
-GAMMA_SCALE = 2
+NUM_VERTICES = 100
+GAMMA_OFFSET = -2
+GAMMA_SHAPE = 9
+GAMMA_SCALE = 0.5
 
 LINSPACE_MARGIN_RIGHT = 2
 
@@ -52,7 +52,7 @@ start_time = time.time()
 fig, ax = plt.subplots(1, 1)
 mean, var, skew, kurt = gamma.stats(GAMMA_SHAPE, moments='mvsk')
 x = np.linspace(0, max(distr_edges) + LINSPACE_MARGIN_RIGHT)
-ax.plot(x, gamma.pdf(x, GAMMA_SHAPE, scale=GAMMA_SCALE), 'r-', label=f'gamma pdf con shape={GAMMA_SHAPE}, scale={GAMMA_SCALE}')
+ax.plot(x, gamma.pdf(x, GAMMA_SHAPE, loc=GAMMA_OFFSET, scale=GAMMA_SCALE), 'r-', label=f'gamma pdf con shape={GAMMA_SHAPE}, scale={GAMMA_SCALE}')
 ax.hist(distr_edges, density=True, histtype='stepfilled', label='distr. numero edge')
 ax.legend(loc='best', frameon=False)
 log_time_execution('Creazione plot', time.time() - start_time)
