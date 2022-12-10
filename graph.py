@@ -10,10 +10,11 @@ from vertix import Vertix
 
 class Graph:
 
-    def __init__(self, num_vertices: int, gamma_k: int, gamma_offset: int) -> None:
+    def __init__(self, num_vertices: int, gamma_shape: float, gamma_offset: float, gamma_scale: float) -> None:
         self.vertices = [Vertix(i) for i in range(num_vertices)]
-        self.gamma_k = gamma_k
+        self.gamma_shape = gamma_shape
         self.gamma_offset = gamma_offset
+        self.gamma_scale = gamma_scale
 
 
     def create(self):
@@ -21,15 +22,12 @@ class Graph:
         for i in range(len(self.vertices)):
             vertix = self.vertices[i]
             random.seed(time.process_time)
-            rnd_value = int(gamma.rvs(self.gamma_k, loc=self.gamma_offset))
+            rnd_value = int(gamma.rvs(self.gamma_shape, loc=self.gamma_offset, scale=self.gamma_scale))
             num.append(rnd_value)
             num_edges = len(self.vertices) - 1 if rnd_value > len(self.vertices) - 1 else rnd_value
-            print(f'{vertix.tag} num edges: {num_edges}')
             vertices_available = [vertix_available for vertix_available in self.vertices if vertix_available.tag != vertix.tag]
             targets = random.sample(population=vertices_available, k=num_edges)
             for target in targets:
-                # vertix.add_edge(target)
-                # target.add_edge(vertix)
                 if i > 0 and self.is_reachable(self.vertices[i - 1].tag, target.tag):
                     vertix.add_edge(self.vertices[i - 1])
                     self.vertices[i - 1].add_edge(vertix)
